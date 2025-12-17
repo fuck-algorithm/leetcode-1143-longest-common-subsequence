@@ -27,6 +27,7 @@ interface TooltipState {
 
 const BASE_CELL_SIZE = 60;
 const BASE_HEADER_SIZE = 50;
+const INDEX_SIZE = 25; // 外侧索引的空间
 
 export function DPTable({
   text1,
@@ -61,8 +62,8 @@ export function DPTable({
 
       const rows = dpTable.length;
       const cols = dpTable[0].length;
-      const tableWidth = BASE_HEADER_SIZE + cols * BASE_CELL_SIZE + 20;
-      const tableHeight = BASE_HEADER_SIZE + rows * BASE_CELL_SIZE + 20;
+      const tableWidth = INDEX_SIZE + BASE_HEADER_SIZE + cols * BASE_CELL_SIZE + 20;
+      const tableHeight = INDEX_SIZE + BASE_HEADER_SIZE + rows * BASE_CELL_SIZE + 20;
 
       // 留出图例的空间（约50px）和一些padding
       const availableWidth = container.clientWidth - 40;
@@ -104,9 +105,9 @@ export function DPTable({
     const svgOffsetX = svgRect.left - containerRect.left;
     const svgOffsetY = svgRect.top - containerRect.top;
     
-    // 计算格子中心位置（相对于容器）
-    const cellX = svgOffsetX + (10 + BASE_HEADER_SIZE + col * BASE_CELL_SIZE + BASE_CELL_SIZE / 2) * scale;
-    const cellY = svgOffsetY + (10 + BASE_HEADER_SIZE + row * BASE_CELL_SIZE + BASE_CELL_SIZE / 2) * scale;
+    // 计算格子中心位置（相对于容器，需要考虑INDEX_SIZE偏移）
+    const cellX = svgOffsetX + (10 + INDEX_SIZE + BASE_HEADER_SIZE + col * BASE_CELL_SIZE + BASE_CELL_SIZE / 2) * scale;
+    const cellY = svgOffsetY + (10 + INDEX_SIZE + BASE_HEADER_SIZE + row * BASE_CELL_SIZE + BASE_CELL_SIZE / 2) * scale;
     
     setTooltip({
       visible: true,
@@ -137,8 +138,8 @@ export function DPTable({
 
     const rows = dpTable.length;
     const cols = dpTable[0].length;
-    const width = HEADER_SIZE + cols * CELL_SIZE + 20;
-    const height = HEADER_SIZE + rows * CELL_SIZE + 20;
+    const width = INDEX_SIZE + HEADER_SIZE + cols * CELL_SIZE + 20;
+    const height = INDEX_SIZE + HEADER_SIZE + rows * CELL_SIZE + 20;
 
     // 使用viewBox保持内部坐标不变，通过width/height控制实际显示大小
     svg
@@ -146,7 +147,7 @@ export function DPTable({
       .attr('height', height * scale)
       .attr('viewBox', `0 0 ${width} ${height}`);
 
-    const g = svg.append('g').attr('transform', 'translate(10, 10)');
+    const g = svg.append('g').attr('transform', `translate(${10 + INDEX_SIZE}, ${10 + INDEX_SIZE})`);
     
     // 定义箭头标记
     const defs = svg.append('defs');
@@ -220,7 +221,22 @@ export function DPTable({
       .attr('fill', '#f5f5f5')
       .attr('stroke', '#ccc');
 
-    // 绘制列标题 (text2字符 + 下标)
+    // 绘制列索引（表格外侧上方）
+    for (let j = 0; j < cols; j++) {
+      const x = HEADER_SIZE + j * CELL_SIZE;
+      g.append('text')
+        .attr('x', x + CELL_SIZE / 2)
+        .attr('y', -INDEX_SIZE / 2)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('font-size', '13px')
+        .attr('font-weight', '500')
+        .attr('font-family', 'monospace')
+        .attr('fill', '#888')
+        .text(j);
+    }
+
+    // 绘制列标题 (text2字符)
     for (let j = 0; j < cols; j++) {
       const x = HEADER_SIZE + j * CELL_SIZE;
       g.append('rect')
@@ -234,29 +250,32 @@ export function DPTable({
       // 字符
       g.append('text')
         .attr('x', x + CELL_SIZE / 2)
-        .attr('y', HEADER_SIZE / 2 - 8)
+        .attr('y', HEADER_SIZE / 2)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
-        .attr('font-size', '18px')
+        .attr('font-size', '20px')
         .attr('font-weight', 'bold')
         .attr('font-family', 'monospace')
         .attr('fill', '#1565c0')
         .text(j === 0 ? 'ε' : text2[j - 1]);
-
-      // 下标
-      g.append('text')
-        .attr('x', x + CELL_SIZE / 2)
-        .attr('y', HEADER_SIZE / 2 + 14)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central')
-        .attr('font-size', '12px')
-        .attr('font-weight', '500')
-        .attr('font-family', 'monospace')
-        .attr('fill', '#666')
-        .text(j);
     }
 
-    // 绘制行标题 (text1字符 + 下标)
+    // 绘制行索引（表格外侧左方）
+    for (let i = 0; i < rows; i++) {
+      const y = HEADER_SIZE + i * CELL_SIZE;
+      g.append('text')
+        .attr('x', -INDEX_SIZE / 2)
+        .attr('y', y + CELL_SIZE / 2)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('font-size', '13px')
+        .attr('font-weight', '500')
+        .attr('font-family', 'monospace')
+        .attr('fill', '#888')
+        .text(i);
+    }
+
+    // 绘制行标题 (text1字符)
     for (let i = 0; i < rows; i++) {
       const y = HEADER_SIZE + i * CELL_SIZE;
       g.append('rect')
@@ -269,27 +288,15 @@ export function DPTable({
 
       // 字符
       g.append('text')
-        .attr('x', HEADER_SIZE / 2 - 8)
+        .attr('x', HEADER_SIZE / 2)
         .attr('y', y + CELL_SIZE / 2)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
-        .attr('font-size', '18px')
+        .attr('font-size', '20px')
         .attr('font-weight', 'bold')
         .attr('font-family', 'monospace')
         .attr('fill', '#2e7d32')
         .text(i === 0 ? 'ε' : text1[i - 1]);
-
-      // 下标
-      g.append('text')
-        .attr('x', HEADER_SIZE / 2 + 12)
-        .attr('y', y + CELL_SIZE / 2)
-        .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'central')
-        .attr('font-size', '12px')
-        .attr('font-weight', '500')
-        .attr('font-family', 'monospace')
-        .attr('fill', '#666')
-        .text(i);
     }
 
     // 绘制DP表格单元格
