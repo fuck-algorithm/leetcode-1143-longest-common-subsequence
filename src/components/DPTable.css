@@ -1,0 +1,211 @@
+.dp-table-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 10px;
+}
+
+.dp-table-svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+}
+
+.legend-item .dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 2px solid;
+}
+
+.legend-item .dot.current {
+  background: #fff59d;
+  border-color: #f9a825;
+}
+
+.legend-item .dot.source {
+  background: #ffecb3;
+  border-color: #ff9800;
+}
+
+.legend-item .dot.match {
+  background: #a5d6a7;
+  border-color: #2e7d32;
+}
+
+
+/* 箭头图例 */
+.legend-item .arrow-legend {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  position: relative;
+}
+
+.legend-item .arrow-legend::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: -3px;
+  border: 5px solid transparent;
+  border-left-width: 8px;
+}
+
+.legend-item .arrow-legend.green {
+  background: #2e7d32;
+}
+
+.legend-item .arrow-legend.green::after {
+  border-left-color: #2e7d32;
+}
+
+.legend-item .arrow-legend.red {
+  background: #d32f2f;
+}
+
+.legend-item .arrow-legend.red::after {
+  border-left-color: #d32f2f;
+}
+
+/* Tooltip 样式 - 带左侧箭头 */
+.cell-tooltip {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+/* 左侧箭头，指向格子 */
+.tooltip-arrow {
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 12px solid #2196F3;
+  flex-shrink: 0;
+  filter: drop-shadow(-2px 0 2px rgba(0,0,0,0.1));
+}
+
+.tooltip-content {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  color: white;
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 16px rgba(33, 150, 243, 0.3);
+  min-width: 160px;
+  max-width: 280px;
+  font-size: 13px;
+}
+
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+
+.tooltip-header .cell-pos {
+  font-family: 'Consolas', monospace;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.tooltip-header .cell-value {
+  background: rgba(255,255,255,0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.tooltip-lcs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.tooltip-lcs .lcs-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.tooltip-lcs .lcs-value {
+  background: rgba(255,255,255,0.95);
+  color: #1565C0;
+  font-weight: bold;
+  font-family: 'Consolas', monospace;
+  font-size: 15px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.tooltip-strings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tooltip-string {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Consolas', monospace;
+}
+
+.tooltip-label {
+  font-size: 11px;
+  opacity: 0.8;
+  min-width: 22px;
+}
+
+.tooltip-char {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.9);
+  font-size: 13px;
+}
+
+.tooltip-char.highlight {
+  background: #4CAF50;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.5);
+}
+
+.tooltip-empty {
+  color: rgba(255,255,255,0.7);
+  font-style: italic;
+  font-size: 12px;
+}

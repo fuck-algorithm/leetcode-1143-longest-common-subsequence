@@ -1,0 +1,172 @@
+# Implementation Plan
+
+- [x] 1. Set up project structure and dependencies
+  - Initialize React + TypeScript project with Vite
+  - Install dependencies: d3, fast-check, vitest
+  - Configure TypeScript and testing environment
+  - Create basic directory structure: `src/components`, `src/core`, `src/hooks`, `src/types`
+  - _Requirements: 1.1_
+
+- [x] 2. Implement core types and validation
+  - [x] 2.1 Create type definitions
+    - Define all interfaces in `src/types/index.ts`: AnimationStep, CellPosition, CellComputation, BacktraceResult, AppState
+    - _Requirements: 2.1, 3.2, 3.3_
+  - [x] 2.2 Implement input validation functions
+    - Create `src/core/validation.ts` with `validateLength` and `validateCharacters` functions
+    - `validateLength`: accept strings with length 1-10
+    - `validateCharacters`: accept only lowercase a-z
+    - _Requirements: 1.2, 1.3_
+  - [x] 2.3 Write property test for input length validation
+    - **Property 1: Input Length Validation**
+    - **Validates: Requirements 1.2**
+  - [x] 2.4 Write property test for input character validation
+    - **Property 2: Input Character Validation**
+    - **Validates: Requirements 1.3**
+
+- [x] 3. Implement LCS algorithm core
+  - [x] 3.1 Implement DP table initialization
+    - Create `src/core/lcs.ts` with `initializeDPTable` function
+    - Create (m+1) × (n+1) table with first row and column set to 0
+    - _Requirements: 2.1, 2.4_
+  - [x] 3.2 Write property test for DP table initialization
+    - **Property 3: DP Table Initialization Correctness**
+    - **Validates: Requirements 2.1, 2.4**
+  - [x] 3.3 Implement cell computation function
+    - Create `computeCell` function implementing state transition logic
+    - If chars match: dp[i][j] = dp[i-1][j-1] + 1
+    - If chars differ: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    - Return CellComputation with value, transitionType, and sourceCells
+    - _Requirements: 3.2, 3.3_
+  - [x] 3.4 Write property test for state transition correctness
+    - **Property 4: DP State Transition Correctness**
+    - **Validates: Requirements 3.2, 3.3**
+  - [x] 3.5 Implement step generator
+    - Create `generateSteps` function that produces AnimationStep array
+    - Each step includes: position, value, transitionType, compared chars, source cells, DP snapshot
+    - _Requirements: 3.1, 3.4, 3.5_
+
+- [x] 4. Implement backtrace logic
+  - [x] 4.1 Implement backtrace generator
+    - Create `generateBacktrace` function in `src/core/lcs.ts`
+    - Start from dp[m][n], trace back to dp[0][0]
+    - Record path, match cells, LCS string, and highlight indices
+    - _Requirements: 6.2, 6.3, 6.4_
+  - [x] 4.2 Write property test for LCS result validity
+    - **Property 5: LCS Result Validity**
+    - **Validates: Requirements 5.3**
+
+- [x] 5. Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 6. Implement React components
+  - [x] 6.1 Create InputPanel component
+    - Two text inputs with validation feedback
+    - Start button (disabled when inputs invalid)
+    - Real-time character filtering
+    - _Requirements: 1.1, 1.2, 1.3, 1.4_
+  - [x] 6.2 Create ControlPanel component
+    - Play/Pause button
+    - Step forward button
+    - Reset button
+    - Speed slider (0.5x - 3x)
+    - Show backtrace button (visible when complete)
+    - _Requirements: 4.1, 4.2, 4.3, 4.4, 6.1_
+  - [x] 6.3 Create ExplanationPanel component
+    - Display current step explanation in Chinese
+    - Show compared characters and transition reason
+    - Display final LCS result when complete
+    - _Requirements: 5.1, 5.2, 5.3_
+  - [x] 6.4 Create StringDisplay component
+    - Display string with label
+    - Highlight specified character indices
+    - _Requirements: 6.4_
+
+- [x] 7. Implement D3.js DP table visualization
+  - [x] 7.1 Create DPTable component with D3
+    - Render (m+1) × (n+1) grid using D3
+    - Display row headers (text1 chars) and column headers (text2 chars)
+    - Show cell values
+    - _Requirements: 2.1, 2.2, 2.3, 2.4_
+  - [x] 7.2 Implement cell highlighting and animations
+    - Highlight current cell being computed
+    - Highlight source cells with different colors
+    - Animate value appearing in cell
+    - _Requirements: 3.1, 3.4, 3.5_
+  - [x] 7.3 Implement backtrace path visualization
+    - Highlight backtrace path cells
+    - Special marking for match cells (diagonal moves)
+    - _Requirements: 6.2, 6.3_
+
+- [x] 8. Implement animation controller
+  - [x] 8.1 Create useAnimationController hook
+    - Manage play/pause state
+    - Handle step progression with configurable speed
+    - Provide stepForward and reset functions
+    - _Requirements: 4.1, 4.2, 4.3, 4.4_
+  - [x] 8.2 Create useLCSVisualization hook
+    - Orchestrate LCS computation and animation
+    - Manage app state transitions (input → animating → complete → backtracing)
+    - _Requirements: 1.4, 6.1_
+
+- [x] 9. Integrate all components in App
+  - [x] 9.1 Wire up App component
+    - Integrate all components with state management
+    - Handle user interactions and state transitions
+    - Apply styling for clean, educational UI
+    - _Requirements: All_
+  - [x] 9.2 Write integration tests
+    - Test complete flow: input → animation → backtrace
+    - Verify UI updates correctly at each step
+    - _Requirements: All_
+
+- [x] 10. Final Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 11. Enhance user comprehension and code-animation synchronization
+  - [x] 11.1 Optimize CodePanel for better code-animation correspondence
+    - Update Java code display with user-provided exact code format
+    - Enhance line highlighting to show precise execution context
+    - Add real-time variable value annotations next to highlighted lines
+    - Show current i, j values and comparison result inline
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
+  - [x] 11.2 Optimize single-screen layout for better information density
+    - Adjust three-column layout proportions for optimal viewing
+    - Ensure all content fits in 1920x1080 without scrolling
+    - Reduce padding and margins where appropriate
+    - _Requirements: 8.1, 8.2, 8.3_
+  - [x] 11.3 Enhance explanation panel for clearer step understanding
+    - Use larger fonts for character comparison display
+    - Add color-coded backgrounds (green for match, yellow for mismatch)
+    - Use icons (✅/❌) for quick visual feedback
+    - Simplify formula display: "左上+1=值" or "max(上,左)=值"
+    - Add visual hints to guide attention to code and table
+    - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
+  - [x] 11.4 Add visual synchronization between code, table, and explanation
+    - Ensure code highlighting, table cell highlighting, and explanation update simultaneously
+    - Add visual cues connecting the three areas
+    - _Requirements: 8.4_
+
+- [x] 12. Final Checkpoint - Verify enhanced UI
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 13. Enhance max comparison visualization for mismatched characters
+  - [x] 13.1 Update AnimationStep type to include comparison info
+    - Add `comparisonInfo` field with topValue, leftValue, topCell, leftCell
+    - Update `src/types/index.ts`
+    - _Requirements: 3.3_
+  - [x] 13.2 Update computeCell and generateSteps to include comparison data
+    - Modify `src/core/lcs.ts` to return both cells and their values when chars don't match
+    - Include comparison info in AnimationStep for mismatch cases
+    - _Requirements: 3.3_
+  - [x] 13.3 Update DPTable to highlight both comparison cells
+    - When chars don't match, highlight both top and left cells simultaneously
+    - Use different visual indicators to show which value is larger
+    - Draw arrows from both cells to current cell
+    - _Requirements: 3.3_
+  - [x] 13.4 Update ExplanationPanel to show comparison details
+    - Display both values being compared: dp[i-1][j] and dp[i][j-1]
+    - Highlight which value is larger and why it was chosen
+    - _Requirements: 3.3, 5.2_
+  - [x] 13.5 Update CodePanel to highlight max comparison
+    - When comparing, highlight the Math.max line with both values annotated
+    - _Requirements: 7.4, 7.5_

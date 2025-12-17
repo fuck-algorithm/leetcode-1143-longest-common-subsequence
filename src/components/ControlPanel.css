@@ -1,0 +1,90 @@
+.control-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  padding: 15px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.control-button {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.control-button.play {
+  background: #27ae60;
+  color: white;
+}
+
+.control-button.play:hover:not(:disabled) {
+  background: #219a52;
+}
+
+.control-button.pause {
+  background: #f39c12;
+  color: white;
+}
+
+.control-button.pause:hover:not(:disabled) {
+  background: #d68910;
+}
+
+.control-button.step {
+  background: #3498db;
+  color: white;
+}
+
+.control-button.step:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.control-button.reset {
+  background: #e74c3c;
+  color: white;
+}
+
+.control-button.reset:hover {
+  background: #c0392b;
+}
+
+.control-button.backtrace {
+  background: #9b59b6;
+  color: white;
+}
+
+.control-button.backtrace:hover {
+  background: #8e44ad;
+}
+
+.control-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.speed-control label {
+  font-size: 14px;
+  color: #555;
+  min-width: 70px;
+}
+
+.speed-control input[type="range"] {
+  width: 100px;
+  cursor: pointer;
+}

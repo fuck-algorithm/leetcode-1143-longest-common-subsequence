@@ -1,0 +1,133 @@
+.input-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+/* 样例选择区域 */
+.examples-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.examples-section > label {
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+}
+
+.examples-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.example-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  background: #f5f5f5;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.example-btn:hover:not(:disabled) {
+  background: #e8f5e9;
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+
+.example-btn.random-btn {
+  background: #fff3e0;
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+.example-btn.random-btn:hover:not(:disabled) {
+  background: #ffe0b2;
+  border-color: #f57c00;
+  color: #e65100;
+}
+
+.example-btn.selected {
+  background: #4caf50;
+  border-color: #4caf50;
+  color: white;
+}
+
+.example-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 输入行 */
+.inputs-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-end;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group label {
+  font-weight: 500;
+  color: #555;
+}
+
+.input-group input {
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  width: 200px;
+  font-family: monospace;
+  transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #4a90d9;
+}
+
+.input-group input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.input-group .error {
+  color: #e74c3c;
+  font-size: 12px;
+}
+
+.start-button {
+  padding: 10px 30px;
+  font-size: 16px;
+  background: #4a90d9;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.start-button:hover:not(:disabled) {
+  background: #357abd;
+}
+
+.start-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

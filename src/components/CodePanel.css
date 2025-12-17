@@ -1,0 +1,344 @@
+.code-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  background: #1e1e1e;
+}
+
+/* Inline 变量值显示 - 像调试器一样 */
+.inline-values {
+  margin-left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  flex-wrap: wrap;
+}
+
+.inline-var {
+  color: #858585;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 参数值样式 */
+.inline-var.param {
+  background: rgba(78, 201, 176, 0.1);
+  border-color: rgba(78, 201, 176, 0.2);
+  color: #4ec9b0;
+}
+
+.inline-val.str {
+  color: #ce9178;
+  font-style: italic;
+}
+
+/* 数组维度样式 */
+.inline-var.dim {
+  background: rgba(100, 181, 246, 0.1);
+  border-color: rgba(100, 181, 246, 0.2);
+  color: #64b5f6;
+}
+
+/* 循环变量样式 */
+.inline-var.loop-var {
+  background: rgba(255, 213, 79, 0.1);
+  border-color: rgba(255, 213, 79, 0.2);
+  color: #ffd54f;
+}
+
+.inline-condition {
+  color: #888;
+  font-size: 9px;
+  padding: 1px 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 2px;
+}
+
+/* 字符比较样式 */
+.inline-var.char-var {
+  background: rgba(156, 220, 254, 0.1);
+  border-color: rgba(156, 220, 254, 0.2);
+}
+
+.inline-val.char {
+  color: #ce9178;
+  font-weight: 700;
+}
+
+/* 源单元格样式 */
+.inline-var.source-var {
+  background: rgba(129, 199, 132, 0.1);
+  border-color: rgba(129, 199, 132, 0.2);
+  color: #81c784;
+}
+
+.inline-op {
+  color: #d4d4d4;
+  font-weight: 600;
+}
+
+/* max比较样式 */
+.max-values {
+  gap: 4px;
+}
+
+.inline-max-label {
+  color: #dcdcaa;
+  font-weight: 600;
+}
+
+.inline-comma {
+  color: #808080;
+}
+
+.cell-label {
+  font-size: 8px;
+  color: #888;
+  margin-right: 2px;
+  vertical-align: super;
+}
+
+.inline-var.winner {
+  background: rgba(129, 199, 132, 0.25);
+  border-color: rgba(129, 199, 132, 0.4);
+  color: #81c784;
+}
+
+.inline-var.winner .inline-val {
+  color: #a5d6a7;
+  font-weight: 700;
+}
+
+.inline-var.loser {
+  background: rgba(239, 83, 80, 0.15);
+  border-color: rgba(239, 83, 80, 0.25);
+  color: #999;
+  opacity: 0.8;
+}
+
+.inline-var.loser .inline-val {
+  color: #ef9a9a;
+}
+
+.inline-val {
+  color: #ce9178;
+  font-weight: 600;
+}
+
+.inline-val.result {
+  color: #4fc3f7;
+  font-weight: 700;
+}
+
+.inline-val.result.final {
+  color: #ffd54f;
+  font-size: 12px;
+  text-shadow: 0 0 4px rgba(255, 213, 79, 0.5);
+}
+
+.inline-assign {
+  color: #9cdcfe;
+  margin-left: 4px;
+}
+
+.inline-result {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.inline-result.match {
+  background: rgba(129, 199, 132, 0.3);
+  color: #81c784;
+  border: 1px solid rgba(129, 199, 132, 0.4);
+}
+
+.inline-result.mismatch {
+  background: rgba(255, 183, 77, 0.3);
+  color: #ffb74d;
+  border: 1px solid rgba(255, 183, 77, 0.4);
+}
+
+.inline-result-label {
+  color: #888;
+  font-size: 9px;
+  margin-left: 4px;
+}
+
+/* 返回值样式 */
+.return-values .inline-var {
+  background: rgba(33, 150, 243, 0.15);
+  border-color: rgba(33, 150, 243, 0.3);
+}
+
+/* 断点区域 */
+.bp-area {
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.breakpoint {
+  color: #e51400;
+  font-size: 10px;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #2d2d2d;
+  border-bottom: 1px solid #404040;
+  flex-shrink: 0;
+}
+
+.code-icon {
+  font-size: 16px;
+}
+
+.code-title {
+  color: #e0e0e0;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.code-pos {
+  margin-left: auto;
+  background: #4a4a4a;
+  color: #ffd54f;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.code-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.code-pre {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  padding: 2px 4px 2px 0;
+  min-height: 22px;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+}
+
+/* 高亮行样式 */
+.line.hl {
+  border-left-color: #ffd54f;
+}
+
+.line.hl-init {
+  background: rgba(100, 181, 246, 0.15);
+  border-left-color: #64b5f6;
+}
+
+.line.hl-loop {
+  background: rgba(255, 213, 79, 0.12);
+  border-left-color: #ffd54f;
+}
+
+.line.hl-compare {
+  background: rgba(156, 220, 254, 0.15);
+  border-left-color: #9cdcfe;
+}
+
+.line.hl-match {
+  background: rgba(129, 199, 132, 0.2);
+  border-left-color: #81c784;
+}
+
+.line.hl-mismatch {
+  background: rgba(255, 183, 77, 0.2);
+  border-left-color: #ffb74d;
+}
+
+.line.hl-return {
+  background: rgba(33, 150, 243, 0.15);
+  border-left-color: #2196F3;
+}
+
+.ln {
+  min-width: 28px;
+  padding: 0 10px 0 8px;
+  text-align: right;
+  color: #606060;
+  font-size: 11px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.lc {
+  color: #d4d4d4;
+  white-space: pre;
+}
+
+/* 语法高亮 */
+.kw { color: #569cd6; }
+.cls { color: #4ec9b0; }
+.fn { color: #dcdcaa; }
+.num { color: #b5cea8; }
+.var { color: #9cdcfe; }
+
+
+
+/* 底部状态栏 */
+.code-footer {
+  padding: 8px 14px;
+  background: #2d2d2d;
+  border-top: 1px solid #404040;
+  flex-shrink: 0;
+}
+
+.status {
+  color: #aaa;
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 滚动条 */
+.code-body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.code-body::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.code-body::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.code-body::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+
