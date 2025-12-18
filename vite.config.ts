@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/leetcode-1143-longest-common-subsequence/',
   server: {
     // 严禁修改端口
     port: 24477,

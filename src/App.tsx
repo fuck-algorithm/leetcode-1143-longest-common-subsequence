@@ -311,7 +311,24 @@ function App() {
           <div className="section-header">
             <span className="section-title">📊 DP表格</span>
             {isAnimating && totalSteps > 0 && (
-              <span className="step-badge">步骤 {displayStepNum} / {totalSteps}</span>
+              <div className="progress-container">
+                <span className="step-badge">步骤 {displayStepNum} / {totalSteps}</span>
+                <div className="progress-bar-wrapper">
+                  <div 
+                    className="progress-bar-fill" 
+                    style={{ width: `${(displayStepNum / totalSteps) * 100}%` }}
+                  />
+                  <input
+                    type="range"
+                    min="1"
+                    max={totalSteps}
+                    value={displayStepNum}
+                    onChange={(e) => goToStep(parseInt(e.target.value) - 1)}
+                    disabled={isPlaying}
+                    className="progress-bar-input"
+                  />
+                </div>
+              </div>
             )}
           </div>
           <div className="table-area">
@@ -392,12 +409,10 @@ function App() {
                 </button>
                 {canShowBacktrace && <button className="ctrl-btn trace" onClick={showBacktrace} title="显示回溯路径">🔍</button>}
               </div>
-              <div className="progress-row">
-                <input type="range" min="0" max={totalSteps} value={displayStepNum} onChange={(e) => goToStep(parseInt(e.target.value) - 1)} disabled={isPlaying} className="progress" />
-                <div className="speed-box">
-                  <span className="speed-val">{speed.toFixed(1)}x</span>
-                  <input type="range" min="0.5" max="3" step="0.5" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))} className="speed" />
-                </div>
+              <div className="speed-row">
+                <span className="speed-label">速度</span>
+                <input type="range" min="0.5" max="3" step="0.5" value={speed} onChange={(e) => setSpeed(parseFloat(e.target.value))} className="speed" />
+                <span className="speed-val">{speed.toFixed(1)}x</span>
               </div>
             </div>
           )}

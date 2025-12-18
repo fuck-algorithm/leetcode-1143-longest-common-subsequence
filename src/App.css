@@ -114,8 +114,8 @@ html, body, #root {
 
 /* ========== 左侧：代码面板 ========== */
 .code-section {
-  width: 1048px;
-  min-width: 1048px;
+  width: 1572px;
+  min-width: 1572px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -151,12 +151,61 @@ html, body, #root {
   color: #333;
 }
 
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
 .step-badge {
   background: #2196F3;
   color: white;
   padding: 3px 10px;
   border-radius: 12px;
   font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.progress-bar-wrapper {
+  flex: 1;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  position: relative;
+  min-width: 100px;
+}
+
+.progress-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+  border-radius: 4px;
+  transition: width 0.1s ease;
+  pointer-events: none;
+}
+
+.progress-bar-input {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  transform: translateY(-50%);
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+}
+
+.progress-bar-input:disabled {
+  cursor: not-allowed;
+}
+
+.progress-bar-wrapper:hover .progress-bar-fill {
+  background: linear-gradient(90deg, #43A047 0%, #7CB342 100%);
 }
 
 .table-area {
@@ -344,32 +393,29 @@ html, body, #root {
   opacity: 1;
 }
 
-.progress-row {
+.speed-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  justify-content: center;
 }
 
-.progress {
-  flex: 1;
-  height: 6px;
-}
-
-.speed-box {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.speed-label {
+  font-size: 12px;
+  color: #666;
 }
 
 .speed-val {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: #666;
-  min-width: 30px;
+  color: #2196F3;
+  min-width: 35px;
 }
 
 .speed {
-  width: 60px;
+  width: 80px;
+  height: 4px;
+  cursor: pointer;
 }
 
 /* ========== 解释面板 ========== */
