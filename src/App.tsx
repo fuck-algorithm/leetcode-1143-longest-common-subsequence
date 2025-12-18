@@ -1,9 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLCSVisualization } from './hooks/useLCSVisualization';
 import { validateInput, filterToLowercase } from './core/validation';
 import { DPTable } from './components/DPTable';
 import { CodePanel } from './components/CodePanel';
+import type { TransitionType, CellPosition } from './types';
 import './App.css';
+
+// 存储每个格子的来源信息
+interface CellSourceInfo {
+  transitionType: TransitionType;
+  sourceCells: CellPosition[];
+}
 
 // 内置样例数据
 const EXAMPLES = [
@@ -57,6 +64,91 @@ function App() {
   const isAnimating = phase !== 'input';
   const isComplete = phase === 'complete' || phase === 'backtracing';
   const lcsLength = dpTable.length > 0 ? dpTable[text1.length]?.[text2.length] ?? 0 : 0;
+
+  // 计算每个格子的来源信息
+  // 直接使用 dpTable 中的非零值来判断格子是否已被计算
+  const cellSources = useMemo(() => {
+    const sources = new Map<string, CellSourceInfo>();
+    if (!text1 || !text2 || dpTable.length === 0) return sources;
+
+    for (let i = 1; i <= text1.length; i++) {
+      for (let j = 1; j <= text2.length; j++) {
+        const cellValue = dpTable[i]?.[j];
+        
+        // 如果格子值为 undefined 或 0，可能还没计算
+        // 但如果值非零，肯定已经计算过了
+        if (cellValue === undefined) continue;
+        
+        // 非零值：肯定已经计算过
+        if (cellValue > 0) {
+          const char1 = text1[i - 1];
+          const char2 = text2[j - 1];
+          const key = `${i},${j}`;
+
+          if (char1 === char2) {
+            sources.set(key, {
+              transitionType: 'match',
+              sourceCells: [{ row: i - 1, col: j - 1 }]
+            });
+          } else {
+            const topValue = dpTable[i - 1]?.[j] ?? 0;
+            const leftValue = dpTable[i]?.[j - 1] ?? 0;
+            sources.set(key, {
+              transitionType: topValue >= leftValue ? 'fromTop' : 'fromLeft',
+              sourceCells: [{ row: i - 1, col: j }, { row: i, col: j - 1 }]
+            });
+          }
+          continue;
+        }
+        
+        // 值为 0 的格子：需要判断是否真的已经计算过
+        // 通过当前步骤位置来判断
+        let isComputed = false;
+        
+        if (isComplete) {
+          isComputed = true;
+        } else if (currentStep) {
+          const phase = currentStep.codePhase;
+          const isInLoop = phase === 'loop-i' || phase === 'loop-j' || 
+                          phase === 'compare' || phase === 'match-assign' || 
+                          phase === 'mismatch-assign';
+          
+          if (isInLoop) {
+            // 行优先顺序判断
+            if (i < currentStep.row) {
+              isComputed = true;
+            } else if (i === currentStep.row && j < currentStep.col) {
+              isComputed = true;
+            } else if (i === currentStep.row && j === currentStep.col) {
+              // 当前格子：只有在赋值阶段才算已计算
+              isComputed = phase === 'match-assign' || phase === 'mismatch-assign';
+            }
+          }
+        }
+        
+        if (!isComputed) continue;
+
+        const char1 = text1[i - 1];
+        const char2 = text2[j - 1];
+        const key = `${i},${j}`;
+
+        if (char1 === char2) {
+          sources.set(key, {
+            transitionType: 'match',
+            sourceCells: [{ row: i - 1, col: j - 1 }]
+          });
+        } else {
+          const topValue = dpTable[i - 1]?.[j] ?? 0;
+          const leftValue = dpTable[i]?.[j - 1] ?? 0;
+          sources.set(key, {
+            transitionType: topValue >= leftValue ? 'fromTop' : 'fromLeft',
+            sourceCells: [{ row: i - 1, col: j }, { row: i, col: j - 1 }]
+          });
+        }
+      }
+    }
+    return sources;
+  }, [text1, text2, dpTable, currentStep, isComplete]);
 
   const handleStart = () => {
     if (validateInput(inputText1) && validateInput(inputText2)) {
@@ -340,6 +432,7 @@ function App() {
                 currentStep={currentStep}
                 backtrackPath={backtrackPath}
                 backtrackMatchCells={backtrackMatchCells}
+                cellSources={cellSources}
               />
             ) : (
               <div className="welcome-box">
@@ -444,20 +537,36 @@ function App() {
 
             {currentStep && !isComplete && (
               <div className="step-explain">
-                <div className="compare-box">
-                  <span className={`compare-char ${currentStep.transitionType === 'match' ? 'match' : ''}`}>{currentStep.char1}</span>
-                  <span className="compare-op">{currentStep.transitionType === 'match' ? '=' : '≠'}</span>
-                  <span className={`compare-char ${currentStep.transitionType === 'match' ? 'match' : ''}`}>{currentStep.char2}</span>
-                </div>
-                {currentStep.transitionType === 'match' ? (
-                  <div className="result-box match">
-                    <span className="result-icon">✅</span>
-                    <div className="result-text"><strong>字符相等！</strong><p>dp[{currentStep.row}][{currentStep.col}] = 左上角 + 1 = <strong>{currentStep.value}</strong></p></div>
-                  </div>
+                {/* 只在比较或赋值阶段显示字符比较信息 */}
+                {(currentStep.codePhase === 'compare' || 
+                  currentStep.codePhase === 'match-assign' || 
+                  currentStep.codePhase === 'mismatch-assign') && currentStep.char1 && currentStep.char2 ? (
+                  <>
+                    <div className="compare-box">
+                      <span className={`compare-char ${currentStep.transitionType === 'match' ? 'match' : ''}`}>{currentStep.char1}</span>
+                      <span className="compare-op">{currentStep.transitionType === 'match' ? '=' : '≠'}</span>
+                      <span className={`compare-char ${currentStep.transitionType === 'match' ? 'match' : ''}`}>{currentStep.char2}</span>
+                    </div>
+                    {currentStep.transitionType === 'match' ? (
+                      <div className="result-box match">
+                        <span className="result-icon">✅</span>
+                        <div className="result-text"><strong>字符相等！</strong><p>dp[{currentStep.row}][{currentStep.col}] = 左上角 + 1 = <strong>{currentStep.value}</strong></p></div>
+                      </div>
+                    ) : (
+                      <div className="result-box mismatch">
+                        <span className="result-icon">❌</span>
+                        <div className="result-text"><strong>字符不等</strong><p>dp[{currentStep.row}][{currentStep.col}] = max(上, 左) = <strong>{currentStep.value}</strong></p></div>
+                      </div>
+                    )}
+                  </>
                 ) : (
-                  <div className="result-box mismatch">
-                    <span className="result-icon">❌</span>
-                    <div className="result-text"><strong>字符不等</strong><p>dp[{currentStep.row}][{currentStep.col}] = max(上, 左) = <strong>{currentStep.value}</strong></p></div>
+                  <div className="waiting">
+                    <p>正在执行: {currentStep.codePhase === 'init-m' ? '初始化 m' : 
+                                 currentStep.codePhase === 'init-n' ? '初始化 n' :
+                                 currentStep.codePhase === 'init-dp' ? '创建 DP 数组' :
+                                 currentStep.codePhase === 'loop-i' ? `外层循环 i=${currentStep.variables.i}` :
+                                 currentStep.codePhase === 'loop-j' ? `内层循环 j=${currentStep.variables.j}` :
+                                 currentStep.codePhase === 'return' ? '返回结果' : '执行中...'}</p>
                   </div>
                 )}
                 <div className="hint">👀 观察左侧代码高亮行 和 表格中的箭头</div>

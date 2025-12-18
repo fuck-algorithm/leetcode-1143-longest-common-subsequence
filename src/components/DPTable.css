@@ -75,19 +75,27 @@
 }
 
 .legend-item .arrow-legend.green {
-  background: #2e7d32;
+  background: #4caf50;
 }
 
 .legend-item .arrow-legend.green::after {
-  border-left-color: #2e7d32;
+  border-left-color: #4caf50;
 }
 
-.legend-item .arrow-legend.red {
-  background: #d32f2f;
+.legend-item .arrow-legend.blue {
+  background: #2196f3;
 }
 
-.legend-item .arrow-legend.red::after {
-  border-left-color: #d32f2f;
+.legend-item .arrow-legend.blue::after {
+  border-left-color: #2196f3;
+}
+
+.legend-item .arrow-legend.orange {
+  background: #ff9800;
+}
+
+.legend-item .arrow-legend.orange::after {
+  border-left-color: #ff9800;
 }
 
 /* Tooltip 样式 - 带左侧箭头 */

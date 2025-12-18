@@ -142,11 +142,13 @@ export function generateSteps(text1: string, text2: string): AnimationStep[] {
   // 主循环
   for (let i = 1; i <= m; i++) {
     // 步骤: for (int i = 1; i <= m; i++)
-    steps.push(createStep('loop-i', 7, { m, n, i }));
+    // 外层循环开始时，高亮到当前行的第一个单元格位置 (i, 1)
+    steps.push(createStep('loop-i', 7, { m, n, i }, i, 1));
     
     for (let j = 1; j <= n; j++) {
       // 步骤: for (int j = 1; j <= n; j++)
-      steps.push(createStep('loop-j', 8, { m, n, i, j }));
+      // 内层循环时，高亮到当前单元格位置 (i, j)
+      steps.push(createStep('loop-j', 8, { m, n, i, j }, i, j));
       
       const char1 = text1[i - 1];
       const char2 = text2[j - 1];

@@ -43,7 +43,15 @@ export function useLCSVisualization(): UseLCSVisualizationReturn {
   const [currentStep, setCurrentStep] = useState<AnimationStep | null>(null);
   const [backtraceResult, setBacktraceResult] = useState<BacktraceResult | null>(null);
 
+  // 用于标记是否正在重置，避免 handleStepChange 覆盖 reset 的状态
+  const [isResetting, setIsResetting] = useState(false);
+
   const handleStepChange = useCallback((step: AnimationStep | null, index: number) => {
+    // 如果正在重置，不处理步骤变化
+    if (isResetting) {
+      return;
+    }
+    
     setCurrentStep(step);
     if (step) {
       setDpTable(step.dpTableSnapshot);
@@ -63,7 +71,7 @@ export function useLCSVisualization(): UseLCSVisualizationReturn {
     if (index === steps.length - 1 && steps.length > 0) {
       setPhase('complete');
     }
-  }, [steps.length, text1, text2]);
+  }, [steps.length, text1, text2, isResetting]);
 
   const controller = useAnimationController(steps, handleStepChange);
 
@@ -94,6 +102,8 @@ export function useLCSVisualization(): UseLCSVisualizationReturn {
   }, [controller]);
 
   const reset = useCallback(() => {
+    // 标记正在重置，防止 handleStepChange 覆盖状态
+    setIsResetting(true);
     setText1('');
     setText2('');
     setPhase('input');
@@ -102,6 +112,9 @@ export function useLCSVisualization(): UseLCSVisualizationReturn {
     setCurrentStep(null);
     setBacktraceResult(null);
     controller.reset();
+    // 重置完成后清除标记
+    // 使用 setTimeout 确保在下一个事件循环中清除，避免竞态条件
+    setTimeout(() => setIsResetting(false), 0);
   }, [controller]);
 
   const showBacktrace = useCallback(() => {

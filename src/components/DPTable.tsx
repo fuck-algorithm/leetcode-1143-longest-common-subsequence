@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
-import type { AnimationStep, CellPosition } from '../types';
+import type { AnimationStep, CellPosition, TransitionType } from '../types';
 import { getLCSAtCell } from '../core/lcs';
 import './DPTable.css';
+
+// 存储每个格子的来源信息
+interface CellSourceInfo {
+  transitionType: TransitionType;
+  sourceCells: CellPosition[];
+}
 
 interface DPTableProps {
   text1: string;
@@ -11,6 +17,7 @@ interface DPTableProps {
   currentStep: AnimationStep | null;
   backtrackPath: CellPosition[];
   backtrackMatchCells: CellPosition[];
+  cellSources: Map<string, CellSourceInfo>; // 每个格子的来源信息
 }
 
 interface TooltipState {
@@ -36,6 +43,7 @@ export function DPTable({
   currentStep,
   backtrackPath,
   backtrackMatchCells,
+  cellSources,
 }: DPTableProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -392,14 +400,121 @@ export function DPTable({
 
 
 
-    // 绘制箭头指示值的来源
-    if (currentStep && currentStep.sourceCells.length > 0) {
+    // 定义箭头标记
+    defs.append('marker')
+      .attr('id', 'arrowhead-diagonal')
+      .attr('viewBox', '0 -4 8 8')
+      .attr('refX', 6)
+      .attr('refY', 0)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M0,-4L8,0L0,4')
+      .attr('fill', '#4caf50');
+
+    defs.append('marker')
+      .attr('id', 'arrowhead-top')
+      .attr('viewBox', '0 -4 8 8')
+      .attr('refX', 6)
+      .attr('refY', 0)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M0,-4L8,0L0,4')
+      .attr('fill', '#2196f3');
+
+    defs.append('marker')
+      .attr('id', 'arrowhead-left')
+      .attr('viewBox', '0 -4 8 8')
+      .attr('refX', 6)
+      .attr('refY', 0)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M0,-4L8,0L0,4')
+      .attr('fill', '#ff9800');
+
+    // 为每个已填充的格子绘制来源箭头
+    for (let i = 1; i < rows; i++) {
+      for (let j = 1; j < cols; j++) {
+        if (!hasValue(i, j)) continue;
+        
+        const key = `${i},${j}`;
+        const sourceInfo = cellSources.get(key);
+        if (!sourceInfo) continue;
+
+        const targetX = HEADER_SIZE + j * CELL_SIZE + CELL_SIZE / 2;
+        const targetY = HEADER_SIZE + i * CELL_SIZE + CELL_SIZE / 2;
+
+        // 当前正在计算的格子不画小箭头（会有大箭头）
+        const isCurrentCell = currentStep && i === currentStep.row && j === currentStep.col;
+        if (isCurrentCell) continue;
+
+        if (sourceInfo.transitionType === 'match') {
+          // 对角线箭头 - 绿色
+          const sourceX = HEADER_SIZE + (j - 1) * CELL_SIZE + CELL_SIZE / 2;
+          const sourceY = HEADER_SIZE + (i - 1) * CELL_SIZE + CELL_SIZE / 2;
+          
+          // 计算箭头起点和终点（缩短一些，不要太长）
+          const dx = targetX - sourceX;
+          const dy = targetY - sourceY;
+          const len = Math.sqrt(dx * dx + dy * dy);
+          const unitX = dx / len;
+          const unitY = dy / len;
+          
+          g.append('line')
+            .attr('x1', sourceX + unitX * 22)
+            .attr('y1', sourceY + unitY * 22)
+            .attr('x2', targetX - unitX * 22)
+            .attr('y2', targetY - unitY * 22)
+            .attr('stroke', '#4caf50')
+            .attr('stroke-width', 2)
+            .attr('stroke-opacity', 0.7)
+            .attr('marker-end', 'url(#arrowhead-diagonal)');
+        } else if (sourceInfo.transitionType === 'fromTop') {
+          // 从上方来 - 蓝色
+          const sourceX = targetX;
+          const sourceY = HEADER_SIZE + (i - 1) * CELL_SIZE + CELL_SIZE / 2;
+          
+          g.append('line')
+            .attr('x1', sourceX)
+            .attr('y1', sourceY + 22)
+            .attr('x2', targetX)
+            .attr('y2', targetY - 22)
+            .attr('stroke', '#2196f3')
+            .attr('stroke-width', 2)
+            .attr('stroke-opacity', 0.7)
+            .attr('marker-end', 'url(#arrowhead-top)');
+        } else {
+          // 从左方来 - 橙色
+          const sourceX = HEADER_SIZE + (j - 1) * CELL_SIZE + CELL_SIZE / 2;
+          const sourceY = targetY;
+          
+          g.append('line')
+            .attr('x1', sourceX + 22)
+            .attr('y1', sourceY)
+            .attr('x2', targetX - 22)
+            .attr('y2', targetY)
+            .attr('stroke', '#ff9800')
+            .attr('stroke-width', 2)
+            .attr('stroke-opacity', 0.7)
+            .attr('marker-end', 'url(#arrowhead-left)');
+        }
+      }
+    }
+
+    // 为当前正在计算的格子绘制更明显的箭头
+    if (currentStep && currentStep.sourceCells.length > 0 && 
+        (currentStep.codePhase === 'match-assign' || currentStep.codePhase === 'mismatch-assign')) {
       const targetX = HEADER_SIZE + currentStep.col * CELL_SIZE + CELL_SIZE / 2;
       const targetY = HEADER_SIZE + currentStep.row * CELL_SIZE + CELL_SIZE / 2;
       
-      // 匹配时的绿色箭头（更大更明显）
+      // 当前格子的大箭头标记
       defs.append('marker')
-        .attr('id', 'arrowhead-match')
+        .attr('id', 'arrowhead-current')
         .attr('viewBox', '0 -6 12 12')
         .attr('refX', 10)
         .attr('refY', 0)
@@ -409,32 +524,6 @@ export function DPTable({
         .append('path')
         .attr('d', 'M0,-6L12,0L0,6')
         .attr('fill', '#2e7d32');
-      
-      // 不匹配时胜出的箭头（较大值）- 绿色
-      defs.append('marker')
-        .attr('id', 'arrowhead-winner')
-        .attr('viewBox', '0 -6 12 12')
-        .attr('refX', 10)
-        .attr('refY', 0)
-        .attr('markerWidth', 8)
-        .attr('markerHeight', 8)
-        .attr('orient', 'auto')
-        .append('path')
-        .attr('d', 'M0,-6L12,0L0,6')
-        .attr('fill', '#2e7d32');
-      
-      // 不匹配时落败的箭头（较小值）- 红色
-      defs.append('marker')
-        .attr('id', 'arrowhead-loser')
-        .attr('viewBox', '0 -6 12 12')
-        .attr('refX', 10)
-        .attr('refY', 0)
-        .attr('markerWidth', 8)
-        .attr('markerHeight', 8)
-        .attr('orient', 'auto')
-        .append('path')
-        .attr('d', 'M0,-6L12,0L0,6')
-        .attr('fill', '#c62828');
 
       if (currentStep.transitionType === 'match') {
         // 匹配情况：只画一条箭头（从左上角）
@@ -448,24 +537,30 @@ export function DPTable({
         const unitX = dx / len;
         const unitY = dy / len;
 
-        const startX = sourceX + unitX * 20;
-        const startY = sourceY + unitY * 20;
-        const endX = targetX - unitX * 20;
-        const endY = targetY - unitY * 20;
-
-        // 绘制箭头线
         g.append('line')
-          .attr('x1', startX)
-          .attr('y1', startY)
-          .attr('x2', endX)
-          .attr('y2', endY)
+          .attr('x1', sourceX + unitX * 20)
+          .attr('y1', sourceY + unitY * 20)
+          .attr('x2', targetX - unitX * 20)
+          .attr('y2', targetY - unitY * 20)
           .attr('stroke', '#2e7d32')
           .attr('stroke-width', 3)
-          .attr('marker-end', 'url(#arrowhead-match)');
+          .attr('marker-end', 'url(#arrowhead-current)');
       } else if (currentStep.comparisonInfo) {
         // 不匹配情况：画两条箭头，显示比较过程
         const { topCell, leftCell, topValue, leftValue } = currentStep.comparisonInfo;
         const isTopWinner = topValue >= leftValue;
+
+        defs.append('marker')
+          .attr('id', 'arrowhead-loser')
+          .attr('viewBox', '0 -6 12 12')
+          .attr('refX', 10)
+          .attr('refY', 0)
+          .attr('markerWidth', 8)
+          .attr('markerHeight', 8)
+          .attr('orient', 'auto')
+          .append('path')
+          .attr('d', 'M0,-6L12,0L0,6')
+          .attr('fill', '#c62828');
 
         // 绘制上方格子的箭头
         const topSourceX = HEADER_SIZE + topCell.col * CELL_SIZE + CELL_SIZE / 2;
@@ -477,7 +572,6 @@ export function DPTable({
         let unitX = dx / len;
         let unitY = dy / len;
 
-        // 上方箭头：胜出用绿色实线，落败用红色虚线
         g.append('line')
           .attr('x1', topSourceX + unitX * 20)
           .attr('y1', topSourceY + unitY * 20)
@@ -486,7 +580,7 @@ export function DPTable({
           .attr('stroke', isTopWinner ? '#2e7d32' : '#c62828')
           .attr('stroke-width', isTopWinner ? 3 : 2)
           .attr('stroke-dasharray', isTopWinner ? 'none' : '6,3')
-          .attr('marker-end', isTopWinner ? 'url(#arrowhead-winner)' : 'url(#arrowhead-loser)');
+          .attr('marker-end', isTopWinner ? 'url(#arrowhead-current)' : 'url(#arrowhead-loser)');
 
         // 绘制左方格子的箭头
         const leftSourceX = HEADER_SIZE + leftCell.col * CELL_SIZE + CELL_SIZE / 2;
@@ -498,7 +592,6 @@ export function DPTable({
         unitX = dx / len;
         unitY = dy / len;
 
-        // 左方箭头：胜出用绿色实线，落败用红色虚线
         g.append('line')
           .attr('x1', leftSourceX + unitX * 20)
           .attr('y1', leftSourceY + unitY * 20)
@@ -507,11 +600,11 @@ export function DPTable({
           .attr('stroke', !isTopWinner ? '#2e7d32' : '#c62828')
           .attr('stroke-width', !isTopWinner ? 3 : 2)
           .attr('stroke-dasharray', !isTopWinner ? 'none' : '6,3')
-          .attr('marker-end', !isTopWinner ? 'url(#arrowhead-winner)' : 'url(#arrowhead-loser)');
+          .attr('marker-end', !isTopWinner ? 'url(#arrowhead-current)' : 'url(#arrowhead-loser)');
       }
     }
 
-  }, [text1, text2, dpTable, currentStep, backtrackPath, backtrackMatchCells, handleCellHover, handleCellLeave, scale]);
+  }, [text1, text2, dpTable, currentStep, backtrackPath, backtrackMatchCells, cellSources, handleCellHover, handleCellLeave, scale]);
 
   // 渲染带高亮的字符串
   const renderHighlightedString = (str: string, indices: number[], label: string) => {
@@ -571,8 +664,9 @@ export function DPTable({
       
       <div className="legend">
         <span className="legend-item"><span className="dot current"></span> 正在计算</span>
-        <span className="legend-item"><span className="arrow-legend green"></span> 匹配/胜出</span>
-        <span className="legend-item"><span className="arrow-legend red"></span> 落败</span>
+        <span className="legend-item"><span className="arrow-legend green"></span> 对角线(匹配)</span>
+        <span className="legend-item"><span className="arrow-legend blue"></span> 从上方</span>
+        <span className="legend-item"><span className="arrow-legend orange"></span> 从左方</span>
       </div>
     </div>
   );
